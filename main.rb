@@ -8,12 +8,14 @@ require "rack"
 require "securerandom"
 
 ENV["MEGABYTES_PER_BLOCK"] ||= "1"
+ENV["MEGABYTES_PER_READ"] ||= "1"
 ENV["BLOCKS_PER_ITERATION"] ||= "100"
 ENV["INTERVAL_IN_SECONDS"] ||= "60"
 
 module DiskBench
   BLOCK_SIZE = ENV.fetch("MEGABYTES_PER_BLOCK").to_i.megabyte
   BLOCK = "\0" * BLOCK_SIZE
+  READ_SIZE = ENV.fetch("MEGABYTES_PER_READ").to_i.megabyte
 
   def self.run(blocks: ENV.fetch("BLOCKS_PER_ITERATION").to_i)
     path = "diskbench-#{SecureRandom.hex(8)}.bin" # use unique files to avoid potential caching effects
@@ -52,9 +54,11 @@ module DiskBench
     start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     bytes_read = 0
 
+    buffer = String.new(capacity: READ_SIZE)
+
     File.open(path, "rb") do |f|
-      while (chunk = f.read(1.megabyte))
-        bytes_read += chunk.bytesize
+      while f.read(READ_SIZE, buffer)
+        bytes_read += READ_SIZE
       end
     end
 
