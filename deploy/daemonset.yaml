@@ -18,7 +18,7 @@ spec:
       tolerations:
         - operator: Exists
       containers:
-        - image: ghcr.io/reclaim-the-stack/kubernetes-disk-performance-monitor:sha-8f0af2db2bd2b53b7587baf14dbed211e8881527
+        - image: ghcr.io/reclaim-the-stack/kubernetes-disk-performance-monitor:sha-1cca1561aabb072d43974679eea585f2f8945d94
           command: [bundle, exec, puma, -p, '80']
           name: web
           ports:
