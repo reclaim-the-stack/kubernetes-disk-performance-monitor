@@ -8,3 +8,6 @@ inherit_gem:
 
 Rails: { Enabled: false }
 RSpecRails: { Enabled: false }
+
+Style/GlobalVars:
+  Enabled: false

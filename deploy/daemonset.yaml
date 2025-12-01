@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: kubernetes-disk-performance-monitor
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: kubernetes-disk-performance-monitor
+  template:
+    metadata:
+      annotations:
+        kubectl.kubernetes.io/default-container: web
+      labels:
+        app: kubernetes-disk-performance-monitor
+    spec:
+      # NOTE: This allows scheduling on all nodes, adjust to your liking
+      tolerations:
+        - operator: Exists
+      containers:
+        - image: ghcr.io/reclaim-the-stack/kubernetes-disk-performance-monitor:sha-8f0af2db2bd2b53b7587baf14dbed211e8881527
+          command: [bundle, exec, puma, -p, '80']
+          name: web
+          ports:
+            - containerPort: 80
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /metrics
+              port: 80
+              scheme: HTTP
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          # NOTE: Memory usage depends heavily on the MEGABYTES_PER_BLOCK configuration, adjust as needed
+          resources:
+            limits:
+              memory: 128Mi
+            requests:
+              cpu: 10m
+              memory: 128Mi
+          securityContext:
+            capabilities:
+              add:
+                - NET_BIND_SERVICE
